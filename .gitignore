@@ -32,6 +32,11 @@ wheels/
 .ipynb_checkpoints/
 .ipynb
 
+# Virtual Environments
+venv/
+env/
+.venv/
+
 # Data (optional)
 data/
 *.csv
