@@ -164,8 +164,9 @@ def run_trial(X_train, X_test, y_train, y_test, config_name, dim_reduction,
     # Save per-fold accuracy curves
     per_fold_file = f"{output_dir}/per_fold_{config_name}.png"
     plot_per_fold_curves(cv_results, save_path=per_fold_file)
-    
-    return {
+
+    # Build result dict
+    result = {
         'config': config_name,
         'dim_reduction': dim_reduction,
         'classifier': classifier,
@@ -178,6 +179,12 @@ def run_trial(X_train, X_test, y_train, y_test, config_name, dim_reduction,
         'time_clf': time_clf,
         'y_pred': y_pred
     }
+
+    # Save learning curve to trial directory
+    learning_curve_file = f"{output_dir}/learning_curves_{config_name}.png"
+    plot_learning_curve(config_name, [result], save_path=learning_curve_file)
+
+    return result
 
 
 def run_experiment(output_dir='results'):
@@ -297,10 +304,3 @@ def summarize_results(all_results, output_dir='results'):
         print(f"{config_name:<12} {r0['dim_reduction']:<15} {r0['classifier']:<15} "
               f"{trial1_acc:<12.4f} {trial2_acc:<12.4f} {mean_acc:<10.4f} {std_acc:<10.4f}")
 
-    # Plot learning curves for all configurations
-    os.makedirs(output_dir, exist_ok=True)
-    learning_curve_path = os.path.join(output_dir, 'learning_curves.png')
-    plot_learning_curve('all', all_results, save_path=learning_curve_path)
-    print(f"\nLearning curves saved to: {learning_curve_path}")
-
-        # ...existing code...
