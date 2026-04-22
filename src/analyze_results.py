@@ -35,9 +35,12 @@ print(f"{'Trial':<10} {'Config':<10} {'Best Score':<12} {'Best Params'}")
 print("-"*80)
 
 config_names = ['A', 'B', 'B_linear', 'B_poly', 'B_rbf', 'B_sigmoid',
-                'C', 'D', 'D_linear', 'D_poly', 'D_rbf', 'D_sigmoid', 'E', 'F']
-dim_reduction_map = {'A': 'PCA', 'B': 'Kernel PCA', 'C': 'PCA', 'D': 'Kernel PCA', 'E': 'None', 'F': 'None'}
-classifier_map = {'A': 'SVM', 'B': 'SVM', 'C': 'Random Forest', 'D': 'Random Forest', 'E': 'SVM', 'F': 'Random Forest'}
+                'C', 'D', 'D_linear', 'D_poly', 'D_rbf', 'D_sigmoid', 'E', 'F',
+                'G', 'H', 'H_linear', 'H_poly', 'H_rbf', 'H_sigmoid', 'I']
+dim_reduction_map = {'A': 'PCA', 'B': 'Kernel PCA', 'C': 'PCA', 'D': 'Kernel PCA', 'E': 'None', 'F': 'None',
+                     'G': 'PCA', 'H': 'Kernel PCA', 'I': 'None'}
+classifier_map = {'A': 'SVM', 'B': 'SVM', 'C': 'Random Forest', 'D': 'Random Forest', 'E': 'SVM', 'F': 'Random Forest',
+                  'G': 'Gradient Boosting', 'H': 'Gradient Boosting', 'I': 'Gradient Boosting'}
 
 for config in config_names:
     for trial_dir in sorted(glob.glob('src/results/trial_*')):
@@ -77,9 +80,9 @@ print("PCA THRESHOLD COMPARISON")
 print("="*80)
 
 for thresh in ['80', '90', '95', '99']:
-    for prefix in ['A', 'C']:
+    for prefix in ['A', 'C', 'G']:
         key = f'{prefix}_{thresh}'
         if key in config_scores:
             scores = config_scores[key]
-            clf = 'SVM' if prefix == 'A' else 'Random Forest'
+            clf = classifier_map[prefix]
             print(f"{key}: threshold={thresh}%, PCA+{clf}, mean={np.mean(scores):.4f}, scores={scores}")

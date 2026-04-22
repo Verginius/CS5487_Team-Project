@@ -24,6 +24,11 @@ SVM_KERNEL = 'rbf'
 RF_N_ESTIMATORS = [100, 200]
 RF_MAX_DEPTH = [10, 20, None]
 
+# Gradient Boosting Configuration
+GB_N_ESTIMATORS = [100, 200]
+GB_MAX_DEPTH = [3, 5, 10]
+GB_LEARNING_RATE = [0.1, 0.5]
+
 # Cross-Validation
 CV_FOLDS = 5
 
@@ -41,4 +46,8 @@ EXPERIMENT_CONFIGS = {
     # Baseline: No dimensionality reduction
     'E': {'dim_reduction': 'none', 'classifier': 'svm'},
     'F': {'dim_reduction': 'none', 'classifier': 'random_forest'},
+    # Gradient Boosting configs
+    'G': {'dim_reduction': 'pca', 'classifier': 'gradient_boosting'},
+    'H': {'dim_reduction': 'kernel_pca', 'classifier': 'gradient_boosting'},
+    'I': {'dim_reduction': 'none', 'classifier': 'gradient_boosting'},
 }

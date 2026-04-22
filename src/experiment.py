@@ -12,8 +12,10 @@ from dimensionality_reduction import apply_pca, apply_kernel_pca, apply_no_reduc
 from classifiers import (
     create_svm_classifier,
     create_random_forest_classifier,
+    create_gradient_boosting_classifier,
     get_svm_param_grid,
     get_rf_param_grid,
+    get_gb_param_grid,
     grid_search_cv
 )
 from evaluation import calculate_metrics, print_metrics, plot_confusion_matrix, save_cv_results, plot_cv_training_curves, plot_per_fold_curves, plot_learning_curve
@@ -56,6 +58,12 @@ class ExperimentPipeline(BaseEstimator, ClassifierMixin):
             param_grid = get_svm_param_grid()
             self.classifier, best_params = grid_search_cv(
                 create_svm_classifier(),
+                X_train_reduced, y_train, param_grid
+            )
+        elif self.classifier_type == 'gradient_boosting':
+            param_grid = get_gb_param_grid()
+            self.classifier, best_params = grid_search_cv(
+                create_gradient_boosting_classifier(),
                 X_train_reduced, y_train, param_grid
             )
         else:
@@ -129,6 +137,12 @@ def run_trial(X_train, X_test, y_train, y_test, config_name, dim_reduction,
     if classifier == 'svm':
         param_grid = get_svm_param_grid()
         base_clf = create_svm_classifier()
+        best_clf, best_params, cv_results = grid_search_cv(
+            base_clf, X_train_red, y_train, param_grid, cv=5
+        )
+    elif classifier == 'gradient_boosting':
+        param_grid = get_gb_param_grid()
+        base_clf = create_gradient_boosting_classifier()
         best_clf, best_params, cv_results = grid_search_cv(
             base_clf, X_train_red, y_train, param_grid, cv=5
         )
@@ -206,17 +220,21 @@ def run_experiment(output_dir='results'):
         ('C', 'pca', 'random_forest'),
         ('E', 'none', 'svm'),
         ('F', 'none', 'random_forest'),
+        ('G', 'pca', 'gradient_boosting'),
+        ('I', 'none', 'gradient_boosting'),
     ]
     # Add kernel_pca configs for each kernel
     for kernel in KERNEL_PCA_KERNELS:
         configs.append((f'B_{kernel}', 'kernel_pca', 'svm', kernel))
         configs.append((f'D_{kernel}', 'kernel_pca', 'random_forest', kernel))
+        configs.append((f'H_{kernel}', 'kernel_pca', 'gradient_boosting', kernel))
 
     # Add PCA threshold variants for comparison
     pca_thresholds = [0.80, 0.90, 0.95, 0.99]
     for threshold in pca_thresholds:
         configs.append((f'A_{int(threshold*100)}', 'pca', 'svm', threshold))
         configs.append((f'C_{int(threshold*100)}', 'pca', 'random_forest', threshold))
+        configs.append((f'G_{int(threshold*100)}', 'pca', 'gradient_boosting', threshold))
 
     # Run 2 experiment trials as required by the assignment
     for trial in range(2):
