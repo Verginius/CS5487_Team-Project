@@ -27,7 +27,7 @@ RF_MAX_DEPTH = [10, 20, None]
 # Cross-Validation
 CV_FOLDS = 5
 
-# No Trials - run each config once with fixed train/test split
+# 2 experiment trials with pre-defined train/test splits
 
 # Classification Tasks
 DIGIT_CLASSES = list(range(10))  # 0-9
