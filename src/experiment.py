@@ -201,40 +201,29 @@ def run_trial(X_train, X_test, y_train, y_test, config_name, dim_reduction,
     return result
 
 
-def run_experiment(output_dir='results'):
+def run_experiment(output_dir='results', config_filter=None):
     """
-    Run the full experiment with all configurations over 2 trials.
+    Run the experiment with specified configurations over 2 trials.
 
     Args:
         output_dir: Directory to save results
+        config_filter: Optional list of config names to run (e.g. ['A', 'B_rbf', 'G_90']).
+                       If None, runs all configs.
 
     Returns:
         List of results for all configurations and trials
     """
     all_results = []
 
-    from config import KERNEL_PCA_KERNELS
+    from config import generate_configs
 
-    configs = [
-        ('A', 'pca', 'svm'),
-        ('C', 'pca', 'random_forest'),
-        ('E', 'none', 'svm'),
-        ('F', 'none', 'random_forest'),
-        ('G', 'pca', 'gradient_boosting'),
-        ('I', 'none', 'gradient_boosting'),
-    ]
-    # Add kernel_pca configs for each kernel
-    for kernel in KERNEL_PCA_KERNELS:
-        configs.append((f'B_{kernel}', 'kernel_pca', 'svm', kernel))
-        configs.append((f'D_{kernel}', 'kernel_pca', 'random_forest', kernel))
-        configs.append((f'H_{kernel}', 'kernel_pca', 'gradient_boosting', kernel))
+    configs = generate_configs(config_filter=config_filter)
 
-    # Add PCA threshold variants for comparison
-    pca_thresholds = [0.80, 0.90, 0.95, 0.99]
-    for threshold in pca_thresholds:
-        configs.append((f'A_{int(threshold*100)}', 'pca', 'svm', threshold))
-        configs.append((f'C_{int(threshold*100)}', 'pca', 'random_forest', threshold))
-        configs.append((f'G_{int(threshold*100)}', 'pca', 'gradient_boosting', threshold))
+    if not configs:
+        print("No configurations matched the filter. Exiting.")
+        return all_results
+
+    print(f"Running {len(configs)} configurations: {[c[0] for c in configs]}")
 
     # Run 2 experiment trials as required by the assignment
     for trial in range(2):
@@ -252,28 +241,14 @@ def run_experiment(output_dir='results'):
         trial_dir = os.path.join(output_dir, f'trial_{trial+1}')
         os.makedirs(trial_dir, exist_ok=True)
 
-        for config_item in configs:
-            if len(config_item) == 4:
-                config_name, dim_reduction, classifier, extra = config_item
-                if dim_reduction == 'pca':
-                    result = run_trial(
-                        X_train, X_test, y_train, y_test,
-                        config_name, dim_reduction, classifier, trial_dir,
-                        pca_threshold=extra, trial=trial
-                    )
-                elif dim_reduction == 'kernel_pca':
-                    result = run_trial(
-                        X_train, X_test, y_train, y_test,
-                        config_name, dim_reduction, classifier, trial_dir,
-                        kernel=extra, trial=trial
-                    )
-            else:
-                config_name, dim_reduction, classifier = config_item
-                result = run_trial(
-                    X_train, X_test, y_train, y_test,
-                    config_name, dim_reduction, classifier, trial_dir,
-                    trial=trial
-                )
+        for config_name, dim_reduction, classifier, extra_params in configs:
+            result = run_trial(
+                X_train, X_test, y_train, y_test,
+                config_name, dim_reduction, classifier, trial_dir,
+                pca_threshold=extra_params.get('pca_threshold', 0.95),
+                kernel=extra_params.get('kernel'),
+                trial=trial
+            )
             result['trial'] = trial + 1
             all_results.append(result)
 

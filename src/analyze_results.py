@@ -5,7 +5,16 @@ Analysis script for experiment results
 import json
 import glob
 import os
+import sys
 import numpy as np
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.config import (
+    generate_configs, get_all_config_names, get_base_config,
+    EXPERIMENT_CONFIGS, DIM_REDUCTION_DISPLAY, CLASSIFIER_DISPLAY,
+    _PCA_CONFIGS,
+)
 
 results = {}
 
@@ -34,13 +43,7 @@ print("="*80)
 print(f"{'Trial':<10} {'Config':<10} {'Best Score':<12} {'Best Params'}")
 print("-"*80)
 
-config_names = ['A', 'B', 'B_linear', 'B_poly', 'B_rbf', 'B_sigmoid',
-                'C', 'D', 'D_linear', 'D_poly', 'D_rbf', 'D_sigmoid', 'E', 'F',
-                'G', 'H', 'H_linear', 'H_poly', 'H_rbf', 'H_sigmoid', 'I']
-dim_reduction_map = {'A': 'PCA', 'B': 'Kernel PCA', 'C': 'PCA', 'D': 'Kernel PCA', 'E': 'None', 'F': 'None',
-                     'G': 'PCA', 'H': 'Kernel PCA', 'I': 'None'}
-classifier_map = {'A': 'SVM', 'B': 'SVM', 'C': 'Random Forest', 'D': 'Random Forest', 'E': 'SVM', 'F': 'Random Forest',
-                  'G': 'Gradient Boosting', 'H': 'Gradient Boosting', 'I': 'Gradient Boosting'}
+config_names = get_all_config_names()
 
 for config in config_names:
     for trial_dir in sorted(glob.glob('src/results/trial_*')):
@@ -80,9 +83,10 @@ print("PCA THRESHOLD COMPARISON")
 print("="*80)
 
 for thresh in ['80', '90', '95', '99']:
-    for prefix in ['A', 'C', 'G']:
+    for prefix in _PCA_CONFIGS:
         key = f'{prefix}_{thresh}'
         if key in config_scores:
             scores = config_scores[key]
-            clf = classifier_map[prefix]
+            base_cfg = EXPERIMENT_CONFIGS[prefix]
+            clf = CLASSIFIER_DISPLAY[base_cfg['classifier']]
             print(f"{key}: threshold={thresh}%, PCA+{clf}, mean={np.mean(scores):.4f}, scores={scores}")
