@@ -8,13 +8,15 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import os
 
 
-def load_digits4000(data_dir='data/digits4000_txt'):
+def load_digits4000(data_dir='data/digits4000_txt', trial=0):
     """
     Load digits4000 dataset from local files.
-    
+
     Args:
         data_dir: Directory containing the dataset files
-        
+        trial: Trial number (0 or 1). The trainset/testset matrices have 2 columns,
+               one per trial.
+
     Returns:
         X_train, X_test, y_train, y_test
     """
@@ -39,10 +41,10 @@ def load_digits4000(data_dir='data/digits4000_txt'):
     trainset = np.loadtxt(trainset_path, dtype=int, delimiter='\t')
     testset = np.loadtxt(testset_path, dtype=int, delimiter='\t')
     
-    # Get indices (second column contains sample indices)
+    # Get indices for the specified trial (each column is one trial)
     # Convert to 0-based indexing for Python arrays
-    train_indices = trainset[:, 1] - 1  # 1-indexed to 0-indexed
-    test_indices = testset[:, 1] - 1
+    train_indices = trainset[:, trial] - 1  # 1-indexed to 0-indexed
+    test_indices = testset[:, trial] - 1
     
     # Check bounds
     max_idx = X.shape[0] - 1

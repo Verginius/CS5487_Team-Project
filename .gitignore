@@ -49,3 +49,6 @@ data/
 *.log
 
 *.zip
+
+# results
+# /src/results/
